@@ -1,0 +1,34 @@
+---
+# tasks file for Webserver
+    - name : Include OS files
+      include_vars : "{{ ansible_facts['distribution'] }}:{{ ansible_facts['distribution_version'] }}.yml"  
+    - name : Printing package name
+      debug : 
+        msg : "Included File : {{ansible_facts['distribution'] }}:{{ ansible_facts['distribution_version'] }} and Package : {{websrv_package_name}}"
+    - name : Install Webserver
+      package :
+        name : "{{websrv_package_name}}"
+        state : present
+    - name : Add masquerade to public zone
+      firewalld :
+        masquerade : yes
+        zone : public
+        permanent : true
+        immediate : true
+        state : enabled
+    - name : Add port to firewall
+      firewalld :
+        port : 80/tcp
+        zone : public
+        permanent : true
+        immediate : true
+        state : enabled
+    - name : Download webpages
+      git :
+        repo : https://github.com/sauravrana646/ansible_arth1
+        clone : yes
+        dest : /var/www/html
+    - name : Start Services
+      service :
+        name : "{{websrv_package_name}}"
+        state : started
